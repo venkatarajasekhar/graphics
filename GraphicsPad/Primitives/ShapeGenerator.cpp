@@ -2,10 +2,12 @@
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <Primitives\Vertex.h>
+#include <vector>
 #define PI 3.14159265359
 using glm::vec3;
 using glm::mat4;
 using glm::mat3;
+using std;
 #define NUM_ARRAY_ELEMENTS(a) sizeof(a) / sizeof(*a)
 
 glm::vec3 randomColor()
@@ -20,8 +22,8 @@ glm::vec3 randomColor()
 ShapeData ShapeGenerator::makeTriangle()
 {
 	ShapeData ret;
-
-	Vertex myTri[] =
+        vector<Vertex> myTri[] =
+	//Vertex myTri[] =
 	{
 		glm::vec3(+0.0f, +1.0f, +0.0f),
 		glm::vec3(+1.0f, +0.0f, +0.0f),
@@ -36,12 +38,20 @@ ShapeData ShapeGenerator::makeTriangle()
 		glm::vec3(+0.0f, +0.0f, +1.0f),
 	};
 	ret.numVertices = NUM_ARRAY_ELEMENTS(myTri);
+	try{
 	ret.vertices = new Vertex[ret.numVertices];
+	} (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	memcpy(ret.vertices, myTri, sizeof(myTri));
-
+        
 	GLushort indices[] = { 0, 1, 2 };
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
+	try{
 	ret.indices = new GLushort[ret.numIndices];
+	} (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	memcpy(ret.indices, indices, sizeof(indices));
 
 	return ret;
@@ -49,7 +59,8 @@ ShapeData ShapeGenerator::makeTriangle()
 
 ShapeData ShapeGenerator::makeCube() {
 	ShapeData ret;
-	Vertex stackVerts[] = 
+	vector<Vertex> stackVerts[] =
+	//Vertex stackVerts[] = 
 	{
 		vec3(-1.0f, +1.0f, +1.0f),  // 0
 		vec3(+1.0f, +0.0f, +0.0f),	// Color
@@ -131,7 +142,11 @@ ShapeData ShapeGenerator::makeCube() {
 	};
 
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
+	try{
 	ret.vertices = new Vertex[ret.numVertices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));
 
 	unsigned short stackIndices[] = {
@@ -143,7 +158,11 @@ ShapeData ShapeGenerator::makeCube() {
 		20, 22, 21, 20, 23, 22, // Bottom
 	};
 	ret.numIndices = NUM_ARRAY_ELEMENTS(stackIndices);
+	try{
 	ret.indices = new GLushort[ret.numIndices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	memcpy(ret.indices, stackIndices, sizeof(stackIndices));
 
 	return ret;
@@ -152,7 +171,8 @@ ShapeData ShapeGenerator::makeCube() {
 ShapeData ShapeGenerator::makeArrow()
 {
 	ShapeData ret;
-	Vertex stackVerts[] =
+	vector<Vertex> stackVerts[] = 
+	//Vertex stackVerts[] =
 	{
 		// Top side of arrow head
 		vec3(+0.00f, +0.25f, -0.25f),         // 0
@@ -286,7 +306,9 @@ ShapeData ShapeGenerator::makeArrow()
 		vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	};
 
-	GLushort stackIndices[] = {
+	vector <GLushort> stackIndices[] = 
+	//GLushort stackIndices[] = {
+	{
 		0, 1, 2, // Top
 		0, 2, 3,
 		4, 6, 5, // Bottom
@@ -310,11 +332,19 @@ ShapeData ShapeGenerator::makeArrow()
 	};
 
 	ret.numVertices = sizeof(stackVerts) / sizeof(*stackVerts);
+	try{
 	ret.vertices = new Vertex[ret.numVertices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));
 
 	ret.numIndices = sizeof(stackIndices) / sizeof(*stackIndices);
+	try{
 	ret.indices = new GLushort[ret.numIndices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	memcpy(ret.indices, stackIndices, sizeof(stackIndices));
 	return ret;
 }
@@ -324,7 +354,11 @@ ShapeData ShapeGenerator::makePlaneVerts(uint dimensions)
 	ShapeData ret;
 	ret.numVertices = dimensions * dimensions;
 	int half = dimensions / 2;
+	try{
 	ret.vertices = new Vertex[ret.numVertices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	for (int i = 0; i < dimensions; i++)
 	{
 		for (int j = 0; j < dimensions; j++)
@@ -344,7 +378,11 @@ ShapeData ShapeGenerator::makePlaneIndices(uint dimensions)
 {
 	ShapeData ret;
 	ret.numIndices = (dimensions - 1) * (dimensions - 1) * 2 * 3; // 2 triangles per square, 3 indices per triangle
+	try{
 	ret.indices = new unsigned short[ret.numIndices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	int runner = 0;
 	for (int row = 0; row < dimensions - 1; row++)
 	{
@@ -368,7 +406,11 @@ ShapeData ShapeGenerator::makePlaneUnseamedIndices(uint tesselation)
 	ShapeData ret;
 	uint dimensions = tesselation * tesselation;
 	ret.numIndices = dimensions * 2 * 3; // 2 triangles per square, 3 indices per triangle
+	try{
 	ret.indices = new unsigned short[ret.numIndices];
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	int runner = 0;
 	for (int row = 0; row < tesselation; row++)
 	{
@@ -459,9 +501,16 @@ ShapeData ShapeGenerator::makeTeapot(uint tesselation, const glm::mat4& lidTrans
 }
 
 void ShapeGenerator::generatePatches(float * v, float * n, float * tc, unsigned short* el, int grid) {
+	try{
 	float * B = new float[4 * (grid + 1)];  // Pre-computed Bernstein basis functions
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
+	try{
 	float * dB = new float[4 * (grid + 1)]; // Pre-computed derivitives of basis functions
-
+	}catch (bad_alloc &) {
+        exit(EXIT_FAILURE);
+	}
 	int idx = 0, elIndex = 0, tcIndex = 0;
 
 	// Pre-compute the basis functions  (Bernstein polynomials)
